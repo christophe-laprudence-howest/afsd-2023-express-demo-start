@@ -3,43 +3,62 @@ import express, { Request, Response } from 'express'
 import { myLogger } from './middleware/logger'
 import { customHeader } from './middleware/header'
 import * as dotenv from 'dotenv'
+import 'reflect-metadata'
+import { DataSource } from 'typeorm'
+import { Shop } from './entitities/shop'
+
 dotenv.config()
 
-// APP SETUP
-const app = express(),
-  port = process.env.PORT || 3000
-
-// MIDDLEWARE
-app.use(express.json()) // for parsing application/json
-app.use(myLogger)
-app.use(customHeader)
-
-// ROUTES
-app.get('/', (request: Request, response: Response) => {
-  response.send(`Welcome, just know: you matter!`)
+const AppDataSource = new DataSource({
+  type: 'mongodb',
+  url: 'mongodb://localhost:27028/shop',
+  entities: [Shop],
+  synchronize: true,
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
 })
+AppDataSource.initialize()
+  .then(() => {
+    // here you can start to work with your database
+    console.log('Connected to database')
+    const shopRepository = AppDataSource.getRepository(Shop)
+    // APP SETUP
+    const app = express(),
+      port = process.env.PORT || 3000
 
-// temp_store
-const shopList = ['Maxi Zoo', 'Zooplius', 'Tom & Co']
+    // MIDDLEWARE
+    app.use(express.json()) // for parsing application/json
+    app.use(myLogger)
+    app.use(customHeader)
 
-app.get('/shop', (req: Request, res: Response) => {
-  res.send(shopList)
-})
+    // ROUTES
+    app.get('/', (request: Request, response: Response) => {
+      response.send(`Welcome, just know: you matter!`)
+    })
 
-app.get('/shop/:myShopId', (req: Request, res: Response) => {
-  const id: number = parseInt(req.params.myShopId)
-  console.log(`id: ${id}`)
-  res.send({ shop: shopList[id] })
-})
+    // temp_store
+    const shopList = ['Maxi Zoo', 'Zooplius', 'Tom & Co']
 
-app.post('/shop', (req: Request, res: Response) => {
-  const shop = req.body
-  const shopName = shop.name
-  shopList.push(shopName)
-  res.send({ shop: shopName })
-})
+    app.get('/shop', (req: Request, res: Response) => {
+      res.send(shopList)
+    })
 
-// APP START
-app.listen(port, () => {
-  console.info(`\nServer 👾 \nListening on http://localhost:${port}/`)
-})
+    app.get('/shop/:myShopId', (req: Request, res: Response) => {
+      const id: number = parseInt(req.params.myShopId)
+      console.log(`id: ${id}`)
+      res.send({ shop: shopList[id] })
+    })
+
+    app.post('/shop', (req: Request, res: Response) => {
+      const shop = req.body
+      const shopName = shop.name
+      shopList.push(shopName)
+      res.send({ shop: shopName })
+    })
+
+    // APP START
+    app.listen(port, () => {
+      console.info(`\nServer 👾 \nListening on http://localhost:${port}/`)
+    })
+  })
+  .catch(error => console.log(error))
