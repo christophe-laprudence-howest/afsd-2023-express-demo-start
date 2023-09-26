@@ -6,6 +6,7 @@ import * as dotenv from 'dotenv'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import { Shop } from './entitities/shop'
+import { ObjectId } from 'mongodb'
 
 dotenv.config()
 
@@ -39,21 +40,39 @@ AppDataSource.initialize()
     // temp_store
     const shopList = ['Maxi Zoo', 'Zooplius', 'Tom & Co']
 
-    app.get('/shop', (req: Request, res: Response) => {
-      res.send(shopList)
+    app.get('/shop', async (req: Request, res: Response) => {
+      //   res.send(shopList)
+      const lst = await shopRepository.find()
+      res.send(lst)
     })
 
-    app.get('/shop/:myShopId', (req: Request, res: Response) => {
-      const id: number = parseInt(req.params.myShopId)
-      console.log(`id: ${id}`)
-      res.send({ shop: shopList[id] })
+    app.get('/shop/:myShopId', async (req: Request, res: Response) => {
+      //   const id: number = parseInt(req.params.myShopId)
+      //   console.log(`id: ${id}`)
+      //   res.send({ shop: shopList[id] })
+
+      const id: string = req.params.myShopId
+      const oID = new ObjectId(id)
+      console.log('👀', oID)
+      //@ts-ignore
+      const lst = await shopRepository.findOneBy({ _id: oID })
+      res.send(lst)
     })
 
-    app.post('/shop', (req: Request, res: Response) => {
-      const shop = req.body
-      const shopName = shop.name
-      shopList.push(shopName)
-      res.send({ shop: shopName })
+    app.post('/shop', async (req: Request, res: Response) => {
+      //   const shop = req.body
+      //   const shopName = shop.name
+      //   shopList.push(shopName)
+      //   res.send({ shop: shopName })
+
+      const { name, city, twentyFourSeven } = req.body
+      const shop = new Shop()
+      shop.name = name
+      shop.city = city
+      shop.twentyFourSeven = twentyFourSeven
+      //antw van db
+      const newShop = await shopRepository.save(shop)
+      res.send(newShop)
     })
 
     // APP START
