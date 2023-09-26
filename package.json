@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Demo project for the 2023 AFSD class - basic express server",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm run dev -w api"
   },
   "workspaces": [
     "packages/*"
