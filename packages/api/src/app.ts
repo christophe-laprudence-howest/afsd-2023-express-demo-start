@@ -1,5 +1,9 @@
 // app.ts
 import express, { Request, Response } from 'express'
+import { myLogger } from './middleware/logger'
+import { customHeader } from './middleware/header'
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 // APP SETUP
 const app = express(),
@@ -7,6 +11,8 @@ const app = express(),
 
 // MIDDLEWARE
 app.use(express.json()) // for parsing application/json
+app.use(myLogger)
+app.use(customHeader)
 
 // ROUTES
 app.get('/', (request: Request, response: Response) => {
