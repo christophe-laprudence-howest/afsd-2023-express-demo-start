@@ -1,0 +1,18 @@
+version: '3.1'
+name: 'demo-api-express'
+
+services:
+  mongodb:
+    image: mongo:latest
+    restart: on-failure:5 # On error, try to restart for a maximum of 5 times
+    ports:
+      - 27028:27017
+    environment:
+      MONGO_INITDB_DATABASE: api
+      # MONGO_INITDB_ROOT_USERNAME: root
+      # MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - dbvolume:/data/db
+
+volumes:
+  dbvolume:
